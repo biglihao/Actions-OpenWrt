@@ -10,17 +10,15 @@
 
 name: Build Redmi AX6 Include OpenClash
 
-on: 
-  release:
-    types: [published]
 
-  #push:
-    #branches:
-      #- master
-
-  # schedule:
-    # 对应的是 UTC 时间，需要转换，0 代表北京时间8点，每个月1日/15日12点编译一次
-    # - cron: 0 0 1,15 * *
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      ssh:
+        description: 'SSH connection to Actions'
+        required: false
+        default: 'false'
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
