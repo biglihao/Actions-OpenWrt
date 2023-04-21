@@ -141,7 +141,7 @@ jobs:
         echo "release_tag=$(date +"%Y.%m.%d-Redmi-AX6")" >> $GITHUB_OUTPUT
         touch release.txt
         echo "红米 AX6 自用精简 Openwrt：" >> release.txt
-        echo "默认系统后台：192.168.123.1" >> release.txt
+        echo "默认系统后台：172.16.0.1" >> release.txt
         echo "账号：root" >> release.txt
         echo "密码：password" >> release.txt
         echo "编译的源码取自：https://github.com/coolsnowwolf/lede" >> release.txt
@@ -149,7 +149,7 @@ jobs:
         echo "默认主题：Argon" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
     - name: Upload firmware to release
-      uses: softprops/action-gh-release@v1
+      uses: biglihao/Actions-OpenWrt
       if: steps.tag.outputs.status == 'success' && !cancelled()
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -163,12 +163,3 @@ jobs:
       with:
         retain_days: 1
         keep_minimum_runs: 3
-
-    - name: Remove old Releases
-      uses: dev-drprasad/delete-older-releases@v0.1.0
-      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
-      with:
-        keep_latest: 6
-        delete_tags: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
