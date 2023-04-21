@@ -149,7 +149,7 @@ jobs:
         echo "默认主题：Argon" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
     - name: Upload firmware to release
-      uses: biglihao/Actions-OpenWrt
+      uses: softprops/action-gh-release@v1
       if: steps.tag.outputs.status == 'success' && !cancelled()
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
