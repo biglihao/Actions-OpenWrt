@@ -83,9 +83,6 @@ jobs:
         echo -e "$(nproc) thread compile"
         make -j$(nproc) || make -j1 || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
-        grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
-        echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
     # 查看磁盘使用情况
     - name: Check space usage
       if: (!cancelled())
@@ -118,33 +115,3 @@ jobs:
       with:
         name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
-    
-    - name: Generate release tag
-      id: tag
-      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
-      run: |
-        echo "release_tag=$(date +"%Y.%m.%d-Redmi-AX6")" >> $GITHUB_OUTPUT
-        touch release.txt
-        echo "红米 AX6 自用精简 Openwrt：" >> release.txt
-        echo "默认系统后台：172.16.0.1" >> release.txt
-        echo "账号：root" >> release.txt
-        echo "密码：password" >> release.txt
-        echo "编译的源码取自：https://github.com/coolsnowwolf/lede" >> release.txt
-        echo "集成插件：ssr plus、TTYD 终端" >> release.txt
-        echo "默认主题：Argon" >> release.txt
-        echo "status=success" >> $GITHUB_OUTPUT
-    - name: Upload firmware to release
-      uses: softprops/action-gh-release@v1
-      if: steps.tag.outputs.status == 'success' && !cancelled()
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ steps.tag.outputs.release_tag }}
-        body_path: release.txt
-        files: ${{ env.FIRMWARE }}/*
-
-    - name: Delete workflow runs
-      uses: GitRML/delete-workflow-runs@main
-      with:
-        retain_days: 1
-        keep_minimum_runs: 3
