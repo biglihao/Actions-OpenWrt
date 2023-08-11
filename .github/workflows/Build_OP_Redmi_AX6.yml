@@ -59,6 +59,11 @@ jobs:
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        # 2023-06-16 临时处理，回滚代码，等无线问题解决
+        cd openwrt
+        git checkout 26f3634631244eedfbdfd61ea6cc3a2d7f5d896f
+        git checkout -b 26f363463
+        
       # 添加红米ax6 编译选项
     - name: Redmi ax6 support
       run: |
