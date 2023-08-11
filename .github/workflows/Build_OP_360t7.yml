@@ -124,9 +124,9 @@ jobs:
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
-        echo "release_tag=$(date +"%Y.%m.%d-Redmi-AX6")" >> $GITHUB_OUTPUT
+        echo "release_tag=$(date +"%Y.%m.%d-MT7981-AX3000系列immortalwrt")" >> $GITHUB_OUTPUT
         touch release.txt
-        echo "360t7 自用精简 Openwrt：" >> release.txt
+        echo "MT7981-AX3000系列immortalwrt：" >> release.txt
         echo "默认系统后台：192.168.1.1" >> release.txt
         echo "账号：root" >> release.txt
         echo "密码：password" >> release.txt
