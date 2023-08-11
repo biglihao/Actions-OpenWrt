@@ -118,3 +118,33 @@ jobs:
       with:
         name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
+        
+        
+    - name: Generate release tag
+      id: tag
+      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      run: |
+        echo "release_tag=$(date +"%Y.%m.%d-Redmi-AX6")" >> $GITHUB_OUTPUT
+        touch release.txt
+        echo "360t7 自用精简 Openwrt：" >> release.txt
+        echo "默认系统后台：192.168.1.1" >> release.txt
+        echo "账号：root" >> release.txt
+        echo "密码：password" >> release.txt
+        echo "编译的源码取自：https://github.com/hanwckf/immortalwrt-mt798x" >> release.txt
+        echo "默认主题：Argon" >> release.txt
+        echo "status=success" >> $GITHUB_OUTPUT
+    - name: Upload firmware to release
+      uses: softprops/action-gh-release@v1
+      if: steps.tag.outputs.status == 'success' && !cancelled()
+      env:
+        GITHUB_TOKEN: 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
+      with:
+        tag_name: ${{ steps.tag.outputs.release_tag }}
+        body_path: release.txt
+        files: ${{ env.FIRMWARE }}/*
+
+    - name: Delete workflow runs
+      uses: GitRML/delete-workflow-runs@main
+      with:
+        retain_days: 1
+        keep_minimum_runs: 3
