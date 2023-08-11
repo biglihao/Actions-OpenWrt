@@ -151,7 +151,7 @@ jobs:
         echo "账号：root" >> release.txt
         echo "密码：password" >> release.txt
         echo "编译的源码取自：https://github.com/coolsnowwolf/lede" >> release.txt
-        echo "集成插件：ssr plus、TTYD 终端" >> release.txt
+        echo "集成插件：ssr plus、DDNS、uHTTPd、网络唤醒、openvpn服务器" >> release.txt
         echo "默认主题：Argon" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
     - name: Upload firmware to release
