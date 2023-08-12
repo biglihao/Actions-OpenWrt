@@ -133,6 +133,7 @@ jobs:
         echo "编译的源码取自：https://github.com/hanwckf/immortalwrt-mt798x 感谢" >> release.txt
         echo "默认主题：Argon" >> release.txt
         echo "包含联发科硬件加速和WIFI闭源驱动" >> release.txt
+        echo "继承插件：openvpn server、eqos aliddns 、ssrplus、uhttpd、updxy、upnp、wol" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
     - name: Upload firmware to release
       uses: softprops/action-gh-release@v1
