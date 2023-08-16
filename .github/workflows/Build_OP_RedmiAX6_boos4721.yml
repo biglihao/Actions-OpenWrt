@@ -60,10 +60,7 @@ jobs:
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-        #修改默认lan IP
-        cd openwrt && sed -i 's/10.10.10.1/172.16.0.1/g' package/base-files/files/bin/config_generate
-        #修改默认root密码为password
-        cd openwrt && sed -i 's/$1$WplwC1t5$HBAtVXABp7XbvVjG4193B.:18753:0:99999:7:::/$1$txIPDI1u$kFnJJMLKiFp5BP3RiHl1X1:19585:0:99999:7:::/g' package/base-files/files/etc/shadow
+        
     
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
@@ -75,6 +72,13 @@ jobs:
       run: |
         [ -e files ] && mv files openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+
+    - name: modify 
+      run: |
+        cd openwrt
+        sed -i 's/10.10.10.1/172.16.0.1/g' package/base-files/files/bin/config_generate
+        sed -i 's/$1$WplwC1t5$HBAtVXABp7XbvVjG4193B.:18753:0:99999:7:::/$1$txIPDI1u$kFnJJMLKiFp5BP3RiHl1X1:19585:0:99999:7:::/g' package/base-files/files/etc/shadow
+    
     - name: Download package
       id: package
       run: |
