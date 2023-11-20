@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: Build 360t7
+name: Build xiaomi_ax3000t
 
 on:
   repository_dispatch:
