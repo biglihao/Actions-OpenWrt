@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: Build Redmi AX6 immortalwrt
+name: Build Redmi AX6 immortalwrt with NSS
 permissions:
     contents: write
 on:
@@ -71,7 +71,7 @@ jobs:
 
     - name: Load custom configuration
       run: 
-      
+        [ -e files ] && mv files openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         cd openwrt
        
