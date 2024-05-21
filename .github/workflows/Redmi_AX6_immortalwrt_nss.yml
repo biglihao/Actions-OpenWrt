@@ -24,7 +24,7 @@ env:
   REPO_URL: https://github.com/DoveKi/immortalwrt-nss
   REPO_BRANCH: qualcommax-6.1-nss-wifi
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: AX6-IMM-NSS.config
+  CONFIG_FILE: AX6_IMM-NSS.config
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: diy-part2.sh
   UPLOAD_BIN_DIR: false
