@@ -21,10 +21,10 @@ on:
         default: 'false'
 
 env:
-  REPO_URL: https://github.com/immortalwrt/immortalwrt
-  REPO_BRANCH: openwrt-23.05
-  FEEDS_CONF: Redmi_AX6_immortalwrt_nss.feeds.conf.default
-  CONFIG_FILE: Redmi_AX6_immortalwrt_nss.config
+  REPO_URL: https://github.com/DoveKi/immortalwrt-nss
+  REPO_BRANCH: qualcommax-6.1-nss-wifi
+  FEEDS_CONF: feeds.conf.default
+  CONFIG_FILE: AX6-IMM-NSS.config
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: diy-part2.sh
   UPLOAD_BIN_DIR: false
@@ -60,9 +60,7 @@ jobs:
         df -hT $PWD
         git clone -b $REPO_BRANCH --single-branch --filter=blob:none $REPO_URL openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-    - name: Load custom feeds
-      run: | 
-         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+
         
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
