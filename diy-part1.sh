@@ -17,4 +17,4 @@
 # echo 'src-git helloworld https://github.com/fw876/helloworld' >>feeds.conf.default
 echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
 echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> "feeds.conf.default"
-echo "src-git nss_packages https://github.com/qosmio/nss-packages.git;NSS-12.5-K6.x" >> "feeds.conf.default"
+echo "src-git nss_packages https://github.com/qosmio/nss-packages.git;NSS-12.4-K6.x" >> "feeds.conf.default"
