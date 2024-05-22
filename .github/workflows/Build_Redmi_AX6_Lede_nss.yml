@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: Build Redmi AX6
+name: Build_Redmi_AX6_Lede_nss
 permissions:
     contents: write
 on:
