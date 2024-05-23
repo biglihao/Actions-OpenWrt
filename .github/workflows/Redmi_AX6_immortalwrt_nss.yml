@@ -21,7 +21,7 @@ on:
         default: 'false'
 
 env:
-  REPO_URL: https://github.com/DoveKi/immortalwrt-nss
+  REPO_URL: https://github.com/immortalwrt/immortalwrt
   REPO_BRANCH: qualcommax-6.1-nss-wifi
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: AX6_IMM-NSS.config
@@ -36,7 +36,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
 
     steps:
     - name: Checkout
@@ -58,9 +58,11 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        git clone -b $REPO_BRANCH --single-branch --filter=blob:none $REPO_URL openwrt
+        git clone $REPO_URL openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-
+        
+    - name: Load custom feeds
+      run: cd openwrt && echo "src-git nss_packages https://github.com/AgustinLorenzo/nss-packages.git;main_nss_wifi" >> "feeds.conf.default"
         
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
@@ -71,7 +73,6 @@ jobs:
     - name: Load custom configuration
       run: |
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
-        cd openwrt
        
     - name: Download package
       id: package
@@ -82,6 +83,18 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
     # 编译固件
+    - name: Build tools
+      run: |
+        cd openwrt
+        make tools/install -j$(nproc) V=s || \
+        make tools/install V=s
+
+    - name: Build toolchain
+      run: |
+        cd openwrt
+        make toolchain/install -j$(nproc) V=s || \
+        make toolchain/install V=s
+
     - name: Compile the firmware
       id: compile
       run: |
