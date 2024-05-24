@@ -24,7 +24,7 @@ env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
   REPO_BRANCH: qualcommax-6.1-nss-wifi
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: AX6_IMM-NSS.config
+  CONFIG_FILE: Redmi_AX6_Immortalwrt_nss.config
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: diy-part2.sh
   UPLOAD_BIN_DIR: false
@@ -152,11 +152,11 @@ jobs:
         echo "release_tag=$(date +"%Y.%m.%d-Redmi-AX6")" >> $GITHUB_OUTPUT
         touch release.txt
         echo "红米 AX6 自用精简 immortalwrt：" >> release.txt
-        echo "默认系统后台：172.16.0.1" >> release.txt
+        echo "默认系统后台：192.168.1.1" >> release.txt
         echo "账号：root" >> release.txt
         echo "密码：password" >> release.txt
         echo "编译的源码取自：https://github.com/immortalwrt/immortalwrt" >> release.txt
-        echo "集成插件：ssr plus、DDNS、uHTTPd、网络唤醒、openvpn服务器" >> release.txt
+        echo "集成插件：passwall、DDNS、uHTTPd、网络唤醒、openvpn服务器" >> release.txt
         echo "默认主题：Argon" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
     - name: Upload firmware to release
