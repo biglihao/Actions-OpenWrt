@@ -23,7 +23,6 @@ on:
 env:
   REPO_URL: https://github.com/AgustinLorenzo/openwrt
   REPO_BRANCH: master
-  FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: Build_Redmi_AX6_AgustinLorenzo.config
   MK_FILE: AgustinLorenzo_ipq807x.mk
   UPLOAD_BIN_DIR: false
@@ -64,33 +63,34 @@ jobs:
       # 添加红米ax6 大分区
     - name: Load custom feeds
       run: |
-        cd openwrt
-	git clone https://github.com/kiddin9/OpenWrt_x86-r2s-r4s-r5s-N1
- 	cp -rf OpenWrt_x86-r2s-r4s-r5s-N1/devices/qualcommax_ipq807x/ ./
-	cp qualcommax_ipq807x/diy/target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/* target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/
-	find "qualcommax_ipq807x/patches" -maxdepth 1 -type f -name '*.revert.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -R -B --merge -p1 -E --forward"
-	[ -e $MK_FILE ] && mv $MK_FILE target/linux/qualcommax/image/
-	rm -rf OpenWrt_x86-r2s-r4s-r5s-N1
+       cd openwrt
+       git clone https://github.com/kiddin9/OpenWrt_x86-r2s-r4s-r5s-N1
+       mkdir qualcommax_ipq807x
+       cp -rf OpenWrt_x86-r2s-r4s-r5s-N1/devices/qualcommax_ipq807x/ qualcommax_ipq807x
+       cp qualcommax_ipq807x/diy/target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/* target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/
+       find "qualcommax_ipq807x/patches" -maxdepth 1 -type f -name '*.revert.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -R -B --merge -p1 -E --forward"
+       [ -e $MK_FILE ] && mv $MK_FILE target/linux/qualcommax/image/
+       rm -rf OpenWrt_x86-r2s-r4s-r5s-N1
 		
     - name: Update feeds
       run: |
-	  cd openwrt
-	  echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
-	  echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;luci-smartdns-dev" >> "feeds.conf.default"
-	  ./scripts/feeds update -a
-	  git clone https://github.com/immortalwrt/luci immortalwrt
-	  cp -r immortalwrt/applications/luci-app-openvpn-server/ feeds/luci/applications/
-	  cp -r immortalwrt/themes/luci-theme-argon/ feeds/luci/themes/
-	  rm -rf feeds/luci/modules/luci-base
-	  rm -rf feeds/luci/modules/luci-mod-status
-      rm -rf feeds/packages/utils/coremark
-      rm -rf feeds/packages/net/v2ray-geodata
-      cp -r immortalwrt/modules/luci-base/ feeds/luci/modules/
-      cp -r immortalwrt/modules/luci-mod-status/ feeds/luci/modules/
-      rm -rf ./tmp
-      sed -i 's/192.168.1.1/172.16.0.1/g' package/base-files/files/bin/config_generate	
-      sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci-light/Makefile
-      ./scripts/feeds update -a	  
+        cd openwrt
+	echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
+ 	echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;luci-smartdns-dev" >> "feeds.conf.default"
+	./scripts/feeds update -a
+	git clone https://github.com/immortalwrt/luci immortalwrt
+	cp -r immortalwrt/applications/luci-app-openvpn-server/ feeds/luci/applications/
+	cp -r immortalwrt/themes/luci-theme-argon/ feeds/luci/themes/
+	rm -rf feeds/luci/modules/luci-base
+	rm -rf feeds/luci/modules/luci-mod-status
+        rm -rf feeds/packages/utils/coremark
+	rm -rf feeds/packages/net/v2ray-geodata
+ 	cp -r immortalwrt/modules/luci-base/ feeds/luci/modules/
+  	cp -r immortalwrt/modules/luci-mod-status/ feeds/luci/modules/
+   	rm -rf ./tmp
+        sed -i 's/192.168.1.1/172.16.0.1/g' package/base-files/files/bin/config_generate	
+        sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci-light/Makefile
+        ./scripts/feeds update -a	  
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
 
