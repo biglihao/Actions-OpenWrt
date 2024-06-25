@@ -65,8 +65,7 @@ jobs:
       run: |
        cd openwrt
        git clone https://github.com/kiddin9/OpenWrt_x86-r2s-r4s-r5s-N1
-       mkdir qualcommax_ipq807x
-       cp -rf OpenWrt_x86-r2s-r4s-r5s-N1/devices/qualcommax_ipq807x/ qualcommax_ipq807x
+       cp -rf OpenWrt_x86-r2s-r4s-r5s-N1/devices/qualcommax_ipq807x/ ./
        cp qualcommax_ipq807x/diy/target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/* target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/
        find "qualcommax_ipq807x/patches" -maxdepth 1 -type f -name '*.revert.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -R -B --merge -p1 -E --forward"
        [ -e $MK_FILE ] && mv $MK_FILE target/linux/qualcommax/image/
