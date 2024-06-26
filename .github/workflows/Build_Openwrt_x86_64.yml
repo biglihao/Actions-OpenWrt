@@ -1,0 +1,169 @@
+#
+# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
+#
+# This is free software, licensed under the MIT License.
+# See /LICENSE for more information.
+#
+# https://github.com/P3TERX/Actions-OpenWrt
+# Description: Build OpenWrt using GitHub Actions
+#
+
+name: Build_Openwrt_x86_64
+permissions:
+    contents: write
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      ssh:
+        description: 'SSH connection to Actions'
+        required: false
+        default: 'false'
+
+env:
+  REPO_URL: https://github.com/openwrt/openwrt
+  REPO_BRANCH: master
+  CONFIG_FILE: Build_Openwrt_x86_64.config
+  UPLOAD_BIN_DIR: false
+  UPLOAD_FIRMWARE: true
+  UPLOAD_COWTRANSFER: false
+  UPLOAD_WETRANSFER: false
+  UPLOAD_RELEASE: true
+  TZ: Asia/Shanghai
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install $(curl -fsSL raw.githubusercontent.com/biglihao/Actions-OpenWrt/main/Redmi_AX6_AgustinLorenzo_nss_depends)
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo timedatectl set-timezone "$TZ"
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
+    - name: Clone source code
+      working-directory: /workdir
+      run: |
+        df -hT $PWD
+        git clone $REPO_URL openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+       
+        
+       
+    - name: Update feeds
+      run: |
+       cd openwrt
+       echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
+       echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;luci-smartdns-dev" >> "feeds.conf.default"
+       ./scripts/feeds update -a
+       git clone https://github.com/immortalwrt/luci immortalwrt
+       cp -r immortalwrt/themes/luci-theme-argon/ feeds/luci/themes/
+       rm -rf feeds/luci/modules/luci-base
+       rm -rf feeds/luci/modules/luci-mod-status
+       rm -rf feeds/packages/utils/coremark
+       rm -rf feeds/packages/net/v2ray-geodata
+       cp -r immortalwrt/modules/luci-base/ feeds/luci/modules/
+       cp -r immortalwrt/modules/luci-mod-status/ feeds/luci/modules/
+       rm -rf ./tmp
+        sed -i 's/192.168.1.1/172.16.0.1/g' package/base-files/files/bin/config_generate	
+        sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci-light/Makefile
+        ./scripts/feeds update -a	  
+    - name: Install feeds
+      run: cd openwrt && ./scripts/feeds install -a
+
+    - name: Load custom configuration
+      run: |
+
+        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+
+    - name: Download package
+      id: package
+      run: |
+        cd openwrt
+        make defconfig
+        make download -j8
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+    # 编译固件
+    - name: Compile the firmware
+      id: compile
+      run: |
+        cd openwrt
+        echo -e "$(nproc) thread compile"
+        make -j$(nproc) || make -j1 || make -j1 V=s
+        echo "status=success" >> $GITHUB_OUTPUT
+        grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
+        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
+        echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+    # 查看磁盘使用情况
+    - name: Check space usage
+      if: (!cancelled())
+      run: df -hT
+    # 上传 bin 文件夹
+    - name: Upload bin directory
+      uses: actions/upload-artifact@main
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      with:
+        name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        path: openwrt/bin
+    # 整理编译好的固件
+    - name: Organize files
+      id: organize
+      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      run: |
+        cd openwrt/bin/targets/*/*
+        rm -rf packages
+        rm -rf *.buildinfo
+        rm -rf sha256sums
+        rm -rf *.manifest
+        rm -rf *kernel.bin
+        rm -rf *.itb
+        rm -rf *.json
+        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+        echo "status=success" >> $GITHUB_OUTPUT
+    - name: Upload firmware directory
+      uses: actions/upload-artifact@main
+      if: steps.organize.outputs.status == 'success' && !cancelled()
+      with:
+        name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        path: ${{ env.FIRMWARE }}
+    
+    - name: Generate release tag
+      id: tag
+      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      run: |
+        echo "release_tag=$(date +"%Y.%m.%d-Redmi-AX6")" >> $GITHUB_OUTPUT
+        touch release.txt
+        echo "红米 AX6 自用精简 Openwrt：" >> release.txt
+        echo "默认系统后台：172.16.0.1" >> release.txt
+        echo "账号：root" >> release.txt
+        echo "密码：password" >> release.txt
+        echo "编译的源码取自：https://github.com/coolsnowwolf/lede" >> release.txt
+        echo "集成插件：ssr plus、DDNS、uHTTPd、网络唤醒、openvpn服务器" >> release.txt
+        echo "默认主题：Argon" >> release.txt
+        echo "status=success" >> $GITHUB_OUTPUT
+    - name: Upload firmware to release
+      uses: softprops/action-gh-release@v1
+      if: steps.tag.outputs.status == 'success' && !cancelled()
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.tag.outputs.release_tag }}
+        body_path: release.txt
+        files: ${{ env.FIRMWARE }}/*
+
+    - name: Delete workflow runs
+      uses: GitRML/delete-workflow-runs@main
+      with:
+        retain_days: 1
+        keep_minimum_runs: 3
