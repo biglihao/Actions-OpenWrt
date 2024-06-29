@@ -69,6 +69,7 @@ jobs:
        cp -rf OpenWrt_x86-r2s-r4s-r5s-N1/devices/qualcommax_ipq807x/ ./
        cp qualcommax_ipq807x/diy/target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/* target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/
        rm -rf OpenWrt_x86-r2s-r4s-r5s-N1
+       rm qualcommax_ipq807x/patches/04-sotck.patch
     
 
     - name: Load custom image
