@@ -68,12 +68,20 @@ jobs:
        git clone https://github.com/biglihao/OpenWrt_x86-r2s-r4s-r5s-N1
        cp -rf OpenWrt_x86-r2s-r4s-r5s-N1/devices/qualcommax_ipq807x/ ./
        cp qualcommax_ipq807x/diy/target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/* target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/
-       find "qualcommax_ipq807x/patches" -maxdepth 1 -type f -name '*.revert.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -R -B --merge -p1 -E --forward"
-       find "qualcommax_ipq807x/patches" -maxdepth 1 -type f -name '*.patch' ! -name '*.revert.patch' ! -name '*.bin.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -B --merge -p1 -E --forward"
+    
 
     - name: Load custom image
       run: |
         [ -e $MK_FILE ] && mv $MK_FILE openwrt/target/linux/qualcommax/image/ipq807x.mk
+
+    - name: Load custome patch
+      run: |
+        [ -e $PATCH_FILE ] && mv $PATCH_FILE openwrt/qualcommax_ipq807x/patches/04-sotck.patch
+    - name: Patch
+      run : |
+        find "qualcommax_ipq807x/patches" -maxdepth 1 -type f -name '*.revert.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -R -B --merge -p1 -E --forward"
+        find "qualcommax_ipq807x/patches" -maxdepth 1 -type f -name '*.patch' ! -name '*.revert.patch' ! -name '*.bin.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -B --merge -p1 -E --forward"
+
        
        
     - name: Update feeds
