@@ -79,6 +79,7 @@ jobs:
         [ -e $PATCH_FILE ] && mv $PATCH_FILE openwrt/qualcommax_ipq807x/patches/04-sotck.patch
     - name: Patch
       run : |
+        cd openwrt
         find "qualcommax_ipq807x/patches" -maxdepth 1 -type f -name '*.revert.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -R -B --merge -p1 -E --forward"
         find "qualcommax_ipq807x/patches" -maxdepth 1 -type f -name '*.patch' ! -name '*.revert.patch' ! -name '*.bin.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -B --merge -p1 -E --forward"
 
@@ -102,8 +103,7 @@ jobs:
        rm -rf ./tmp
         sed -i 's/192.168.1.1/172.16.0.1/g' package/base-files/files/bin/config_generate	
         sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci-light/Makefile
-        ./scripts/feeds update -a	 
-        cat target/linux/qualcommax/image/ipq807x.mk
+        ./scripts/feeds update -a
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
 
