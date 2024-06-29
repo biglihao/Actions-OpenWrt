@@ -72,7 +72,7 @@ jobs:
        find "qualcommax_ipq807x/patches" -maxdepth 1 -type f -name '*.patch' ! -name '*.revert.patch' ! -name '*.bin.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -B --merge -p1 -E --forward"
        rm -rf OpenWrt_x86-r2s-r4s-r5s-N1
        [ -e $MK_FILE ] && mv $MK_FILE target/linux/qualcommax/image/ipq807x.mk
-       cat target/linux/qualcommax/image/ipq807x.mk
+       
        
     - name: Update feeds
       run: |
@@ -92,7 +92,8 @@ jobs:
        rm -rf ./tmp
         sed -i 's/192.168.1.1/172.16.0.1/g' package/base-files/files/bin/config_generate	
         sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci-light/Makefile
-        ./scripts/feeds update -a	  
+        ./scripts/feeds update -a	 
+        cat target/linux/qualcommax/image/ipq807x.mk
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
 
