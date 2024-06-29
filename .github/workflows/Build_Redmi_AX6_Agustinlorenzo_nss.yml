@@ -69,10 +69,7 @@ jobs:
        cp -rf OpenWrt_x86-r2s-r4s-r5s-N1/devices/qualcommax_ipq807x/ ./
        cp qualcommax_ipq807x/diy/target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/* target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/
        rm -rf OpenWrt_x86-r2s-r4s-r5s-N1
-       ls
       
-    
-
     - name: Load custom image
       run: |
         [ -e $MK_FILE ] && mv $MK_FILE openwrt/target/linux/qualcommax/image/ipq807x.mk
@@ -80,10 +77,10 @@ jobs:
       run: |
         cd openwrt/qualcommax_ipq807x/patches
         ls
-        rm 04-sotck.patch
+        rm 04-stock.patch
     - name: Load custome patch
       run: |
-        [ -e $PATCH_FILE ] && mv $PATCH_FILE openwrt/qualcommax_ipq807x/patches/04-sotck.patch
+        [ -e $PATCH_FILE ] && mv $PATCH_FILE openwrt/qualcommax_ipq807x/patches/04-stock.patch
     - name: Patch
       run : |
         cd openwrt
