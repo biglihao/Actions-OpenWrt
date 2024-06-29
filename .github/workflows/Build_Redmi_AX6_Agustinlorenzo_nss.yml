@@ -25,7 +25,7 @@ env:
   REPO_BRANCH: master
   CONFIG_FILE: Build_Redmi_AX6_AgustinLorenzo.config
   MK_FILE: AgustinLorenzo_ipq807x.mk
-  PATCH_FILE: patch
+  PATCH_FILE: sotck.patch
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: false
