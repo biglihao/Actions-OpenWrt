@@ -25,6 +25,7 @@ env:
   REPO_BRANCH: master
   CONFIG_FILE: Build_Redmi_AX6_AgustinLorenzo.config
   MK_FILE: AgustinLorenzo_ipq807x.mk
+  PATCH_FILE: 04-stock.patch
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: false
@@ -66,10 +67,11 @@ jobs:
        cd openwrt
        git clone https://github.com/kiddin9/OpenWrt_x86-r2s-r4s-r5s-N1
        cp -rf OpenWrt_x86-r2s-r4s-r5s-N1/devices/qualcommax_ipq807x/ ./
+       [ -e $PATCH_FILE ] && mv $PATCH_FILE qualcommax_ipq807x/patches/
        cp qualcommax_ipq807x/diy/target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/* target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/
        find "qualcommax_ipq807x/patches" -maxdepth 1 -type f -name '*.revert.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -R -B --merge -p1 -E --forward"
        find "qualcommax_ipq807x/patches" -maxdepth 1 -type f -name '*.patch' ! -name '*.revert.patch' ! -name '*.bin.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -B --merge -p1 -E --forward"
-       [ -e $MK_FILE ] && mv $MK_FILE target/linux/qualcommax/image/
+       #[ -e $MK_FILE ] && mv $MK_FILE target/linux/qualcommax/image/
        rm -rf OpenWrt_x86-r2s-r4s-r5s-N1
        
     - name: Update feeds
