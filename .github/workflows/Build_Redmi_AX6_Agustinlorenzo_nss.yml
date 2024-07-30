@@ -179,8 +179,8 @@ jobs:
         echo "默认系统后台：172.16.0.1" >> release.txt
         echo "账号：root" >> release.txt
         echo "密码：password" >> release.txt
-        echo "编译的源码取自：https://github.com/coolsnowwolf/lede" >> release.txt
-        echo "集成插件：ssr plus、DDNS、uHTTPd、网络唤醒、openvpn服务器" >> release.txt
+        echo "编译的源码取自：https://github.com/AgustinLorenzo/openwrt" >> release.txt
+        echo "集成插件：passwall、DDNS、uHTTPd、网络唤醒、openvpn服务器、udpxy、smartdns、acme、upnp" >> release.txt
         echo "默认主题：Argon" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
     - name: Upload firmware to release
@@ -192,9 +192,3 @@ jobs:
         tag_name: ${{ steps.tag.outputs.release_tag }}
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
-
-    - name: Delete workflow runs
-      uses: GitRML/delete-workflow-runs@main
-      with:
-        retain_days: 1
-        keep_minimum_runs: 3
