@@ -68,6 +68,8 @@ jobs:
        ./scripts/feeds update -a
        git clone https://github.com/immortalwrt/luci immortalwrt
        cp -r immortalwrt/themes/luci-theme-argon/ feeds/luci/themes/
+       cp -r immortalwrt/applications/luci-app-arpbind/ feeds/luci/applications/
+       cp -r immortalwrt/applications/luci-app-openvpn-server/ feeds/luci/applications/
        rm -rf feeds/luci/modules/luci-base
        rm -rf feeds/luci/modules/luci-mod-status
        rm -rf feeds/packages/utils/coremark
@@ -75,7 +77,7 @@ jobs:
        cp -r immortalwrt/modules/luci-base/ feeds/luci/modules/
        cp -r immortalwrt/modules/luci-mod-status/ feeds/luci/modules/
        rm -rf ./tmp
-        sed -i 's/192.168.1.1/172.16.0.1/g' package/base-files/files/bin/config_generate	
+        sed -i 's/192.168.1.1/10.0.0.1/g' package/base-files/files/bin/config_generate	
         sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci-light/Makefile
         ./scripts/feeds update -a -f   
     - name: Install feeds
@@ -144,12 +146,12 @@ jobs:
       run: |
         echo "release_tag=$(date +"%Y.%m.%d-Redmi-AX6")" >> $GITHUB_OUTPUT
         touch release.txt
-        echo "红米 AX6 自用精简 Openwrt：" >> release.txt
-        echo "默认系统后台：172.16.0.1" >> release.txt
+        echo "自用精简 Openwrt-x86：" >> release.txt
+        echo "默认系统后台：10.0.0.1" >> release.txt
         echo "账号：root" >> release.txt
         echo "密码：password" >> release.txt
-        echo "编译的源码取自：https://github.com/coolsnowwolf/lede" >> release.txt
-        echo "集成插件：ssr plus、DDNS、uHTTPd、网络唤醒、openvpn服务器" >> release.txt
+        echo "编译的源码取自：https://github.com/openwrt/openwrt" >> release.txt
+        echo "集成插件：arpbind、acme、DDNS、uHTTPd、wol、openvpn-server、passwall、smartdns、udpxy、upnp" >> release.txt
         echo "默认主题：Argon" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
     - name: Upload firmware to release
