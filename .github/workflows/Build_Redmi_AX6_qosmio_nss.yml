@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: Build_Redmi_AX6_Lede_nss
+name: Build_Redmi_AX6_AgustinLorenzo
 permissions:
     contents: write
 on:
@@ -21,12 +21,11 @@ on:
         default: 'false'
 
 env:
-  REPO_URL: https://github.com/coolsnowwolf/lede
-  REPO_BRANCH: master
-  FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: Redmi_AX6_Lede_nss.config
-  DIY_P1_SH: diy-part1.sh
-  DIY_P2_SH: diy-part2.sh
+  REPO_URL: https://github.com/qosmio/openwrt-ipq
+  REPO_BRANCH: 24.10-nss
+  CONFIG_FILE: ax6-qosmio/.config
+  MK_FILE: ax6-qosmio/ipq807x.mk
+  PATCH_FILE: sotck.patch
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: false
@@ -36,7 +35,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Checkout
@@ -48,7 +47,7 @@ jobs:
       run: |
         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq update
-        sudo -E apt-get -qq install $(curl -fsSL raw.githubusercontent.com/biglihao/Actions-OpenWrt/main/Redmi_AX6_Lede_nss_depends)
+        sudo -E apt-get -qq install $(curl -fsSL raw.githubusercontent.com/biglihao/Actions-OpenWrt/main/Redmi_AX6_AgustinLorenzo_nss_depends)
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
@@ -58,36 +57,66 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        git clone $REPO_URL openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-        # 2023-06-16 临时处理，回滚代码，等无线问题解决
-        #cd openwrt
-        #git checkout 26f3634631244eedfbdfd61ea6cc3a2d7f5d896f
-        #git checkout -b 26f363463
+       
         
-      # 添加红米ax6 编译选项
-    #- name: Redmi ax6 support
-      #run: |
-        #cp -rf $GITHUB_WORKSPACE/ax6/generic.mk openwrt/target/linux/ipq807x/image/generic.mk
+      # 添加红米ax6 大分区
     - name: Load custom feeds
       run: |
-        # [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        chmod +x $DIY_P1_SH
+       cd openwrt
+       git clone https://github.com/biglihao/OpenWrt_x86-r2s-r4s-r5s-N1
+       cp -rf OpenWrt_x86-r2s-r4s-r5s-N1/devices/qualcommax_ipq807x/ ./
+       cp qualcommax_ipq807x/diy/target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/* target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/
+       rm -rf OpenWrt_x86-r2s-r4s-r5s-N1
+      
+    - name: Load custom image
+      run: |
+        [ -e $MK_FILE ] && mv $MK_FILE openwrt/target/linux/qualcommax/image/ipq807x.mk
+    - name: rm patch
+      run: |
+        cd openwrt/qualcommax_ipq807x/patches
+        ls
+        rm 04-stock.patch
+    - name: Load custome patch
+      run: |
+        [ -e $PATCH_FILE ] && mv $PATCH_FILE openwrt/qualcommax_ipq807x/patches/04-stock.patch
+    - name: Patch
+      run : |
         cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P1_SH
-    - name: Update feeds
-      run: cd openwrt && ./scripts/feeds update -a
+        find "qualcommax_ipq807x/patches" -maxdepth 1 -type f -name '*.revert.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -R -B --merge -p1 -E --forward"
+        find "qualcommax_ipq807x/patches" -maxdepth 1 -type f -name '*.patch' ! -name '*.revert.patch' ! -name '*.bin.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -B --merge -p1 -E --forward"
 
+       
+       
+    - name: Update feeds
+      run: |
+       cd openwrt
+       echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
+       echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> "feeds.conf.default"
+       ./scripts/feeds update -a
+       git clone https://github.com/immortalwrt/luci immortalwrt
+       cp -r immortalwrt/applications/luci-app-openvpn-server/ feeds/luci/applications/
+       cp -r immortalwrt/themes/luci-theme-argon/ feeds/luci/themes/
+       rm -rf feeds/luci/modules/luci-base
+       rm -rf feeds/luci/modules/luci-mod-status
+       rm -rf feeds/packages/utils/coremark
+       rm -rf feeds/packages/net/v2ray-geodata
+       cp -r immortalwrt/modules/luci-base/ feeds/luci/modules/
+       cp -r immortalwrt/modules/luci-mod-status/ feeds/luci/modules/
+       rm -rf ./tmp
+        sed -i 's/192.168.1.1/172.16.0.1/g' package/base-files/files/bin/config_generate	
+        sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci-light/Makefile
+        ./scripts/feeds update -a
+        cat target/linux/qualcommax/image/ipq807x.mk
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
 
     - name: Load custom configuration
       run: |
-        #[ -e files ] && mv files openwrt/files
+
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
-        #chmod +x $DIY_P2_SH
-        #cd openwrt
-        #$GITHUB_WORKSPACE/$DIY_P2_SH
+
     - name: Download package
       id: package
       run: |
@@ -150,8 +179,8 @@ jobs:
         echo "默认系统后台：172.16.0.1" >> release.txt
         echo "账号：root" >> release.txt
         echo "密码：password" >> release.txt
-        echo "编译的源码取自：https://github.com/coolsnowwolf/lede" >> release.txt
-        echo "集成插件：ssr plus、DDNS、uHTTPd、网络唤醒、openvpn服务器" >> release.txt
+        echo "编译的源码取自：https://github.com/qosmio/openwrt-ipq" >> release.txt
+        echo "集成插件：passwall、DDNS、uHTTPd、网络唤醒、openvpn服务器、udpxy、smartdns、acme、upnp" >> release.txt
         echo "默认主题：Argon" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
     - name: Upload firmware to release
@@ -163,9 +192,3 @@ jobs:
         tag_name: ${{ steps.tag.outputs.release_tag }}
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
-
-    - name: Delete workflow runs
-      uses: GitRML/delete-workflow-runs@main
-      with:
-        retain_days: 1
-        keep_minimum_runs: 3
