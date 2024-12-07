@@ -97,6 +97,7 @@ jobs:
        ./scripts/feeds update -a
        git clone https://github.com/immortalwrt/luci immortalwrt
        cp -r immortalwrt/applications/luci-app-openvpn-server/ feeds/luci/applications/
+       cp -r immortalwrt/applications/luci-app-arpbind/ feeds/luci/applications/
        cp -r immortalwrt/themes/luci-theme-argon/ feeds/luci/themes/
        rm -rf feeds/luci/modules/luci-base
        rm -rf feeds/luci/modules/luci-mod-status
