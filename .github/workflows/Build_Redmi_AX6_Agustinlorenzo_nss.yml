@@ -93,10 +93,11 @@ jobs:
       run: |
        cd openwrt
        echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
-       echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;luci-smartdns-dev" >> "feeds.conf.default"
+       echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> "feeds.conf.default"
        ./scripts/feeds update -a
        git clone https://github.com/immortalwrt/luci immortalwrt
        cp -r immortalwrt/applications/luci-app-openvpn-server/ feeds/luci/applications/
+       cp -r immortalwrt/applications/luci-app-arpbind/ feeds/luci/applications/
        cp -r immortalwrt/themes/luci-theme-argon/ feeds/luci/themes/
        rm -rf feeds/luci/modules/luci-base
        rm -rf feeds/luci/modules/luci-mod-status
@@ -108,7 +109,6 @@ jobs:
         sed -i 's/192.168.1.1/172.16.0.1/g' package/base-files/files/bin/config_generate	
         sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci-light/Makefile
         ./scripts/feeds update -a
-        cat target/linux/qualcommax/image/ipq807x.mk
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
 
