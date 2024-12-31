@@ -64,7 +64,7 @@ jobs:
       run: |
        cd openwrt
        echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
-       echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;luci-smartdns-dev" >> "feeds.conf.default"
+       echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> "feeds.conf.default"
        ./scripts/feeds update -a
        git clone https://github.com/immortalwrt/luci immortalwrt
        cp -r immortalwrt/themes/luci-theme-argon/ feeds/luci/themes/
