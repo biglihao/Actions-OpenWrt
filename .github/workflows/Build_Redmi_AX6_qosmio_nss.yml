@@ -92,8 +92,10 @@ jobs:
     - name: Update feeds
       run: |
        cd openwrt
-       echo "src-git passwall_packages https://github.com/Openwrt-Passwall/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
-       echo "src-git passwall_luci https://github.com/Openwrt-Passwall/openwrt-passwall.git;main" >> "feeds.conf.default"
+       echo "src-git passwall_packages https://github.com/Openwrt-Passwall/openwrt-passwall-packages.git;main" >> "test.feeds"
+       echo "src-git passwall_luci https://github.com/Openwrt-Passwall/openwrt-passwall.git;main" >> "test.feeds"
+       cat feeds.conf.default >> "test.feeds"
+       mv test.feeds feeds.conf.default
        ./scripts/feeds update -a
        git clone https://github.com/immortalwrt/luci immortalwrt
        cp -r immortalwrt/applications/luci-app-openvpn-server/ feeds/luci/applications/
