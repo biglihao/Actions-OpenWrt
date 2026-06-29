@@ -22,7 +22,7 @@ on:
 
 env:
   REPO_URL: https://github.com/qosmio/openwrt-ipq
-  REPO_BRANCH: main-nss
+  REPO_BRANCH: 25.12-nss
   CONFIG_FILE: ax6-qosmio/.config
   MK_FILE: ax6-qosmio/ipq807x.mk
   PATCH_FILE: sotck.patch
